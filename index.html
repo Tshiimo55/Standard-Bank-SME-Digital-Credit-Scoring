@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Standard Bank - SME Digital Credit Scoring</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header with Banner -->
+    <header class="header">
+        <div class="banner-container">
+            <img src="images/standard bank banner.jpeg" alt="Standard Bank Banner" class="banner-image">
+        </div>
+        <div class="logo-container">
+            <img src="images/standard bank logo.png" alt="Standard Bank Logo" class="logo">
+            <h1 class="bank-title">SME Digital Credit Scoring</h1>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Left Column - Application Form -->
+        <section class="form-section">
+            <h2 class="section-title">Business Loan Application</h2>
+            <form id="loanApplicationForm" class="application-form">
+                <!-- Business Name -->
+                <div class="form-group">
+                    <label for="businessName">Business Name *</label>
+                    <input type="text" id="businessName" name="businessName" required placeholder="Enter registered business name">
+                </div>
+
+                <!-- Annual Revenue -->
+                <div class="form-group">
+                    <label for="revenue">Annual Revenue (ZAR) *</label>
+                    <input type="number" id="revenue" name="revenue" required placeholder="e.g., 2500000" min="0" step="1000">
+                </div>
+
+                <!-- Years in Operation -->
+                <div class="form-group">
+                    <label for="yearsInOperation">Years in Operation *</label>
+                    <select id="yearsInOperation" name="yearsInOperation" required>
+                        <option value="">Select years</option>
+                        <option value="0-2">Less than 2 years</option>
+                        <option value="2-5">2 - 5 years</option>
+                        <option value="5-10">5 - 10 years</option>
+                        <option value="10+">More than 10 years</option>
+                    </select>
+                </div>
+
+                <!-- Industry Sector -->
+                <div class="form-group">
+                    <label for="industry">Industry Sector *</label>
+                    <select id="industry" name="industry" required>
+                        <option value="">Select industry</option>
+                        <option value="retail">Retail & Wholesale</option>
+                        <option value="manufacturing">Manufacturing</option>
+                        <option value="technology">Technology & IT</option>
+                        <option value="services">Professional Services</option>
+                        <option value="construction">Construction</option>
+                        <option value="healthcare">Healthcare</option>
+                        <option value="hospitality">Hospitality & Tourism</option>
+                        <option value="agriculture">Agriculture</option>
+                    </select>
+                </div>
+
+                <!-- Number of Employees -->
+                <div class="form-group">
+                    <label for="employees">Number of Employees *</label>
+                    <input type="number" id="employees" name="employees" required placeholder="e.g., 25" min="1" max="250">
+                </div>
+
+                <!-- Loan Amount Requested -->
+                <div class="form-group">
+                    <label for="loanAmount">Loan Amount Requested (ZAR) *</label>
+                    <input type="number" id="loanAmount" name="loanAmount" required placeholder="e.g., 500000" min="10000" step="10000">
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="submit-btn">Get Credit Assessment</button>
+            </form>
+        </section>
+
+        <!-- Right Column - Results Dashboard -->
+        <section class="results-section" id="resultsSection">
+            <h2 class="section-title">Credit Assessment Results</h2>
+            
+            <!-- Loading Indicator (Hidden by default) -->
+            <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+                <div class="spinner"></div>
+                <p>Processing your application...</p>
+            </div>
+
+            <!-- Results Content (Hidden by default) -->
+            <div id="resultsContent" class="results-content" style="display: none;">
+                <!-- Credit Score Card -->
+                <div class="result-card score-card">
+                    <h3>Credit Score</h3>
+                    <div class="score-value" id="creditScore">750</div>
+                    <div class="score-range">out of 1000</div>
+                </div>
+
+                <!-- Risk Classification Card -->
+                <div class="result-card risk-card">
+                    <h3>Risk Classification</h3>
+                    <div class="risk-badge" id="riskBadge">Low Risk</div>
+                </div>
+
+                <!-- Loan Decision Card -->
+                <div class="result-card decision-card">
+                    <h3>Loan Decision</h3>
+                    <div class="decision-value" id="loanDecision">Approved</div>
+                    <div class="max-amount" id="maxAmount">Maximum: R 750,000</div>
+                </div>
+
+                <!-- Key Metrics -->
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <span class="metric-label">Debt-to-Income Ratio</span>
+                        <span class="metric-value" id="debtRatio">32%</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Business Stability</span>
+                        <span class="metric-value" id="stability">High</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Industry Risk</span>
+                        <span class="metric-value" id="industryRisk">Low</span>
+                    </div>
+                </div>
+
+                <!-- Explanatory Factors -->
+                <div class="factors-section">
+                    <h4>Key Decision Factors</h4>
+                    <ul class="factors-list" id="factorsList">
+                        <li class="positive-factor">✓ Strong revenue growth potential</li>
+                        <li class="positive-factor">✓ Established business history</li>
+                        <li class="warning-factor">⚠ Industry volatility considerations</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Empty State (Shown by default) -->
+            <div id="emptyState" class="empty-state">
+                <p>Complete the application form to receive your instant credit assessment</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p class="disclaimer">This is a preliminary credit assessment. Final terms subject to verification and approval by Standard Bank.</p>
+            <div class="footer-links">
+                <a href="#">Terms & Conditions</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Contact Us</a>
+            </div>
+            <p class="copyright">&copy; 2026 Standard Bank. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
