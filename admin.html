@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Standard Bank - Admin Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .back-link {
+            color: #005199;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border: 2px solid #005199;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .back-link:hover {
+            background: #005199;
+            color: white;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            border-top: 4px solid #005199;
+        }
+        
+        .stat-card.high-risk {
+            border-top-color: #dc3545;
+        }
+        
+        .stat-card.medium-risk {
+            border-top-color: #ffc107;
+        }
+        
+        .stat-card.low-risk {
+            border-top-color: #28a745;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #005199;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            overflow-x: auto;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        
+        th {
+            background: #005199;
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .risk-Low { 
+            color: #28a745; 
+            font-weight: 600;
+            background: #e8f5e9;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .risk-Medium { 
+            color: #856404; 
+            font-weight: 600;
+            background: #fff3cd;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .risk-High { 
+            color: #721c24; 
+            font-weight: 600;
+            background: #f8d7da;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .decision-Approved {
+            color: #28a745;
+            font-weight: 600;
+        }
+        
+        .decision-Conditional {
+            color: #ffc107;
+            font-weight: 600;
+        }
+        
+        .decision-Declined {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        
+        .loading-indicator {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #005199;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+            font-style: italic;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header with Logo -->
+    <header class="header">
+        <div class="logo-container">
+            <img src="images/standard bank logo.png" alt="Standard Bank Logo" class="logo">
+            <h1 class="bank-title"></h1>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="admin-container">
+        <!-- Header with Navigation -->
+        <div class="admin-header">
+            <h2 class="section-title">Loan Applications Overview</h2>
+            <a href="index.html" class="back-link">← Back to Application Form</a>
+        </div>
+
+        <!-- Stats Cards (will be populated by JavaScript) -->
+        <div class="stats-container" id="statsContainer">
+            <div class="stat-card">
+                <div class="stat-value" id="totalApplications">0</div>
+                <div class="stat-label">Total Applications</div>
+            </div>
+            <div class="stat-card low-risk">
+                <div class="stat-value" id="lowRiskCount">0</div>
+                <div class="stat-label">Low Risk</div>
+            </div>
+            <div class="stat-card medium-risk">
+                <div class="stat-value" id="mediumRiskCount">0</div>
+                <div class="stat-label">Medium Risk</div>
+            </div>
+            <div class="stat-card high-risk">
+                <div class="stat-value" id="highRiskCount">0</div>
+                <div class="stat-label">High Risk</div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading-indicator">
+            <div class="spinner"></div>
+            <p>Loading applications...</p>
+        </div>
+
+        <!-- Table Container -->
+        <div id="table-container" class="table-container" style="display: none;"></div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p class="disclaimer">This is an internal admin dashboard. For authorized personnel only.</p>
+            <div class="footer-links">
+                <a href="index.html">Application Form</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Contact Support</a>
+            </div>
+            <p class="copyright">&copy; 2026 Standard Bank. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // ============================================
+        // SUPABASE CONFIGURATION 
+        // ============================================
+        // IMPORTANT: Update these with your actual Supabase credentials
+        const supabaseUrl = 'https://szwxxemjbtmzuxxnqkab.supabase.co'; // Replace with your Project URL
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6d3h4ZW1qYnRtenV4eG5xa2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTQ3MzAsImV4cCI6MjA4ODM5MDczMH0.kxpiaSc5Ifolv1saXOfqvrj2cJMqMK6nZn5DTlWAq9Y'; // Replace with your anon key
+        
+        // Initialize Supabase client
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        
+        // Format currency in ZAR
+        function formatCurrency(amount) {
+            return 'R ' + amount.toLocaleString('en-ZA', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+        }
+        
+        // Format date nicely
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-ZA', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        // Load applications and update UI
+        async function loadApplications() {
+            try {
+                console.log('📊 Loading applications from Supabase...');
+                
+                const { data, error } = await supabaseClient
+                    .from('loan_applications')
+                    .select('*')
+                    .order('application_date', { ascending: false });
+                
+                if (error) {
+                    throw error;
+                }
+                
+                console.log(`✅ Loaded ${data.length} applications`);
+                
+                // Hide loading, show table
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('table-container').style.display = 'block';
+                
+                if (data.length === 0) {
+                    // Show empty state
+                    document.getElementById('table-container').innerHTML = `
+                        <div class="no-data">
+                            <p>No loan applications found.</p>
+                            <p>Submit an application from the main form to see data here.</p>
+                        </div>
+                    `;
+                    
+                    // Update stats with zeros
+                    document.getElementById('totalApplications').textContent = '0';
+                    document.getElementById('lowRiskCount').textContent = '0';
+                    document.getElementById('mediumRiskCount').textContent = '0';
+                    document.getElementById('highRiskCount').textContent = '0';
+                    
+                    return;
+                }
+                
+                // Calculate stats
+                const totalApps = data.length;
+                const lowRisk = data.filter(app => app.risk_level === 'Low').length;
+                const mediumRisk = data.filter(app => app.risk_level === 'Medium').length;
+                const highRisk = data.filter(app => app.risk_level === 'High').length;
+                
+                // Update stats
+                document.getElementById('totalApplications').textContent = totalApps;
+                document.getElementById('lowRiskCount').textContent = lowRisk;
+                document.getElementById('mediumRiskCount').textContent = mediumRisk;
+                document.getElementById('highRiskCount').textContent = highRisk;
+                
+                // Build table HTML
+                let html = '<table>';
+                html += `
+                    <tr>
+                        <th>Date</th>
+                        <th>Business Name</th>
+                        <th>Revenue</th>
+                        <th>Loan Amount</th>
+                        <th>Credit Score</th>
+                        <th>Risk Level</th>
+                        <th>Decision</th>
+                    </tr>
+                `;
+                
+                data.forEach(app => {
+                    const riskClass = `risk-${app.risk_level}`;
+                    const decisionClass = `decision-${app.loan_decision}`;
+                    
+                    html += `
+                        <tr>
+                            <td>${formatDate(app.application_date)}</td>
+                            <td><strong>${app.business_name}</strong></td>
+                            <td>${formatCurrency(app.revenue)}</td>
+                            <td>${formatCurrency(app.loan_amount)}</td>
+                            <td style="font-weight: 600; text-align: center;">${app.credit_score}</td>
+                            <td><span class="${riskClass}">${app.risk_level}</span></td>
+                            <td class="${decisionClass}">${app.loan_decision}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</table>';
+                document.getElementById('table-container').innerHTML = html;
+                
+            } catch (error) {
+                console.error('❌ Error loading applications:', error);
+                
+                document.getElementById('loading').innerHTML = `
+                    <div class="error-message">
+                        <strong>Error loading applications:</strong><br>
+                        ${error.message}<br><br>
+                        <button onclick="location.reload()" style="padding: 0.5rem 1rem; background: #005199; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        // Auto-refresh data every 30 seconds
+        function startAutoRefresh() {
+            loadApplications(); // Initial load
+            setInterval(loadApplications, 30000); // Refresh every 30 seconds
+        }
+        
+        // Start loading when page loads
+        document.addEventListener('DOMContentLoaded', startAutoRefresh);
+    </script>
+</body>
+</html>
