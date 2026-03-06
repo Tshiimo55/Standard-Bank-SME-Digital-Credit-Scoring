@@ -1,14 +1,50 @@
+// ============================================
+// SUPABASE CONFIGURATION - UPDATE THESE VALUES!
+// ============================================
+console.log('🚀 Script starting...');
+
+// REMOVE 'const' - just assign to the existing supabase object
+supabaseUrl = 'https://szwxxemjbtmzuxxnqkab.supabase.co';  // REPLACE THIS
+supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6d3h4ZW1qYnRtenV4eG5xa2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTQ3MzAsImV4cCI6MjA4ODM5MDczMH0.kxpiaSc5Ifolv1saXOfqvrj2cJMqMK6nZn5DTlWAq9Y';  // REPLACE THIS
+
+console.log('Supabase URL:', supabaseUrl);
+console.log('Supabase Key (first 10 chars):', supabaseKey.substring(0, 10) + '...');
+
+// Check if Supabase client is available
+if (typeof supabase === 'undefined') {
+    console.error('❌ Supabase client not loaded! Check if script tag is in HTML');
+} else {
+    console.log('✅ Supabase client loaded');
+}
+
+// Initialize Supabase client - use the existing supabase object
+let supabaseClient;
+try {
+    supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+    console.log('✅ Supabase client initialized successfully');
+} catch (error) {
+    console.error('❌ Failed to initialize Supabase:', error);
+}
+
 // Wait for DOM to load
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ DOM loaded');
+    
     // Get form element
     const form = document.getElementById('loanApplicationForm');
     const loadingIndicator = document.getElementById('loadingIndicator');
     const resultsContent = document.getElementById('resultsContent');
     const emptyState = document.getElementById('emptyState');
+    
+    console.log('Form found:', form ? '✅' : '❌');
+    console.log('Loading indicator found:', loadingIndicator ? '✅' : '❌');
+    console.log('Results content found:', resultsContent ? '✅' : '❌');
+    console.log('Empty state found:', emptyState ? '✅' : '❌');
 
     // Handle form submission
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
+        console.log('📝 Form submitted');
         
         // Show loading, hide results and empty state
         loadingIndicator.style.display = 'block';
@@ -17,31 +53,70 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Get form data
         const formData = {
-            businessName: document.getElementById('businessName').value,
+            business_name: document.getElementById('businessName').value,
             revenue: parseFloat(document.getElementById('revenue').value),
-            yearsInOperation: document.getElementById('yearsInOperation').value,
+            years_in_operation: document.getElementById('yearsInOperation').value,
             industry: document.getElementById('industry').value,
             employees: parseInt(document.getElementById('employees').value),
-            loanAmount: parseFloat(document.getElementById('loanAmount').value)
+            loan_amount: parseFloat(document.getElementById('loanAmount').value)
         };
         
-        // Simulate API call (will be replaced with actual backend)
-        setTimeout(() => {
-            // Calculate mock credit assessment
+        console.log('Form data:', formData);
+        
+        try {
+            // Calculate credit assessment
+            console.log('Calculating credit score...');
             const assessment = calculateCreditAssessment(formData);
+            console.log('Assessment result:', assessment);
+            
+            // Save to Supabase
+            console.log('Saving to Supabase...');
+            
+            if (!supabaseClient) {
+                throw new Error('Supabase client not initialized');
+            }
+            
+            const { data, error } = await supabaseClient
+                .from('loan_applications')
+                .insert([{
+                    business_name: formData.business_name,
+                    revenue: formData.revenue,
+                    years_in_operation: formData.years_in_operation,
+                    industry: formData.industry,
+                    employees: formData.employees,
+                    loan_amount: formData.loan_amount,
+                    credit_score: assessment.creditScore,
+                    risk_level: assessment.riskLevel,
+                    loan_decision: assessment.loanDecision,
+                    approved_amount: assessment.maxAmount > 0 ? assessment.maxAmount : null
+                }])
+                .select();
+            
+            if (error) {
+                console.error('❌ Supabase error:', error);
+                console.error('Error details:', error.message, error.details, error.hint);
+                alert('Database error: ' + error.message);
+            } else {
+                console.log('✅ Application saved to Supabase:', data);
+            }
             
             // Update UI with results
             updateResults(assessment);
             
+        } catch (error) {
+            console.error('❌ Error:', error);
+            alert('Error: ' + error.message);
+        } finally {
             // Hide loading, show results
             loadingIndicator.style.display = 'none';
             resultsContent.style.display = 'block';
-        }, 2000); // Simulate 2 second processing time
+            console.log('✅ Results displayed');
+        }
     });
 
-    // Mock credit assessment calculation (temporary - will be replaced by backend)
+    // Credit assessment calculation
     function calculateCreditAssessment(data) {
-        // This is mock logic - will be replaced by actual backend API
+        console.log('Calculating assessment for:', data);
         let score = 0;
         let factors = [];
         
@@ -58,13 +133,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Years in operation assessment
-        if (data.yearsInOperation === '10+') {
+        if (data.years_in_operation === '10+') {
             score += 250;
             factors.push({ type: 'positive', text: 'Long-established business' });
-        } else if (data.yearsInOperation === '5-10') {
+        } else if (data.years_in_operation === '5-10') {
             score += 200;
             factors.push({ type: 'positive', text: 'Established business history' });
-        } else if (data.yearsInOperation === '2-5') {
+        } else if (data.years_in_operation === '2-5') {
             score += 150;
             factors.push({ type: 'warning', text: 'Growing business' });
         } else {
@@ -107,19 +182,19 @@ document.addEventListener('DOMContentLoaded', function() {
         if (score >= 700) {
             riskLevel = 'Low';
             loanDecision = 'Approved';
-            maxAmount = Math.min(data.loanAmount * 1.5, 2000000);
+            maxAmount = Math.min(data.loan_amount * 1.5, 2000000);
         } else if (score >= 500) {
             riskLevel = 'Medium';
             loanDecision = 'Conditional';
-            maxAmount = Math.min(data.loanAmount, 1000000);
+            maxAmount = Math.min(data.loan_amount, 1000000);
         } else {
             riskLevel = 'High';
             loanDecision = 'Declined';
             maxAmount = 0;
         }
         
-        // Calculate debt ratio (mock)
-        const debtRatio = ((data.loanAmount / data.revenue) * 100).toFixed(1);
+        // Calculate debt ratio
+        const debtRatio = ((data.loan_amount / data.revenue) * 100).toFixed(1);
         
         return {
             creditScore: Math.min(score, 1000),
@@ -127,14 +202,16 @@ document.addEventListener('DOMContentLoaded', function() {
             loanDecision: loanDecision,
             maxAmount: maxAmount,
             debtRatio: debtRatio + '%',
-            stability: data.yearsInOperation === '10+' ? 'High' : (data.yearsInOperation === '5-10' ? 'Medium' : 'Low'),
+            stability: data.years_in_operation === '10+' ? 'High' : (data.years_in_operation === '5-10' ? 'Medium' : 'Low'),
             industryRisk: lowRiskIndustries.includes(data.industry) ? 'Low' : (mediumRiskIndustries.includes(data.industry) ? 'Medium' : 'High'),
-            factors: factors.slice(0, 5) // Show top 5 factors
+            factors: factors.slice(0, 5)
         };
     }
 
     // Update UI with assessment results
     function updateResults(assessment) {
+        console.log('Updating UI with:', assessment);
+        
         document.getElementById('creditScore').textContent = assessment.creditScore;
         
         const riskBadge = document.getElementById('riskBadge');
@@ -164,5 +241,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             (factor.type === 'warning' ? '⚠ ' + factor.text : '✗ ' + factor.text);
             factorsList.appendChild(li);
         });
+        
+        console.log('UI update complete');
     }
 });
